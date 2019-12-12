@@ -1,5 +1,6 @@
 {
     "name": "vzaica/work-schedule",
+    "version": "1.0.0",
     "require": {
         "nesbot/carbon": "^2.27"
     },
