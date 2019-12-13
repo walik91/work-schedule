@@ -58,6 +58,29 @@ class ShiftSchedule
         return !$this->isWorkDay($date);
     }
 
+    public function getDaysPeriod($from, $to)
+    {
+        $from = $this->getCarbonDate($from);
+        $to = $this->getCarbonDate($to);
+
+        $period = new \Carbon\CarbonPeriod();
+        $period->setStartDate($from);
+        $period->setEndDate($to);
+
+        $days = [];
+        foreach($period as $date) {
+            $is_work = $this->isWorkDay($date);
+
+            $days[] = [
+                'date' => $date->format('Y-m-d'),
+                'is_work' => $is_work,
+                'is_holiday' => !$is_work
+            ];
+        }
+
+        return $days;
+    }
+
     /**
      * @return mixed
      */

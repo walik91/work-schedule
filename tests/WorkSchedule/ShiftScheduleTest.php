@@ -42,4 +42,28 @@ class ShiftScheduleTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($shiftSchedule->isHoliday('2020-04-09'));
         $this->assertTrue($shiftSchedule->isWorkDay('2020-04-10'));
     }
+
+    public function testGetDaysPeriod()
+    {
+        $shiftSchedule = new WorkSchedule\ShiftSchedule(3, 3, '2019-12-12');
+        $days = $shiftSchedule->getDaysPeriod('2019-12-12', '2019-12-18');
+
+        $this->assertContains([
+            'date' => '2019-12-12',
+            'is_work' => true,
+            'is_holiday' => false
+        ], $days);
+
+        $this->assertContains([
+            'date' => '2019-12-14',
+            'is_work' => true,
+            'is_holiday' => false
+        ], $days);
+
+        $this->assertContains([
+            'date' => '2019-12-15',
+            'is_work' => false,
+            'is_holiday' => true
+        ], $days);
+    }
 }
