@@ -6,30 +6,31 @@ class ShiftSchedule
 {
     private $work_days_count;
     private $holiday_days_count;
+
+    /**
+     * @var \Carbon\Carbon
+     */
     private $start_work_date;
 
-    const MONDAY = 1;
-    const TUESDAY = 2;
+    const MONDAY    = 1;
+    const TUESDAY   = 2;
     const WEDNESDAY = 3;
-    const THURSDAY = 4;
-    const FRIDAY = 5;
-    const SATURDAY = 6;
-    const SUNDAY = 0;
+    const THURSDAY  = 4;
+    const FRIDAY    = 5;
+    const SATURDAY  = 6;
+    const SUNDAY    = 0;
 
     private $weekends = [
-        self::MONDAY => false,
-        self::TUESDAY => false,
+        self::MONDAY    => false,
+        self::TUESDAY   => false,
         self::WEDNESDAY => false,
-        self::THURSDAY => false,
-        self::FRIDAY => false,
-        self::SATURDAY => false,
-        self::SUNDAY => false,
+        self::THURSDAY  => false,
+        self::FRIDAY    => false,
+        self::SATURDAY  => false,
+        self::SUNDAY    => false,
     ];
 
-    private $holidays = [
-
-
-    ];
+    private $holidays = [];
 
     public function __construct($work_days_count, $holiday_days_count, $start_work_date)
     {
@@ -38,12 +39,17 @@ class ShiftSchedule
         $this->setStartWorkDate($start_work_date);
     }
 
-    public function setWeekend($week_day, $flag)
+    public function getCarbonDate($date)
     {
-        if (!isset($this->weekends[$week_day])) {
-
+        if ($date instanceof \Carbon\Carbon) {
+            return $date;
         }
 
+        return \Carbon\Carbon::createFromFormat('Y-m-d', $date);
+    }
+
+    public function setWeekend($week_day, $flag)
+    {
         $this->weekends[$week_day] = $flag;
     }
 
@@ -60,15 +66,6 @@ class ShiftSchedule
     public function hasWeekend($week_day)
     {
         return isset($this->weekends[$week_day]) && $this->weekends[$week_day];
-    }
-
-    public function getCarbonDate($date)
-    {
-        if ($date instanceof \Carbon\Carbon) {
-            return $date;
-        }
-
-        return \Carbon\Carbon::createFromFormat('Y-m-d', $date);
     }
 
     public function countWeekDays()
@@ -102,9 +99,6 @@ class ShiftSchedule
         if ($this->hasHoliday($date->format('Y-m-d'))) {
             return false;
         }
-
-
-
 
         $period = new \Carbon\CarbonPeriod();
         $period->setStartDate($this->getStartWorkDate());
@@ -142,10 +136,6 @@ class ShiftSchedule
         }
 
         return $is_workday;
-
-        /*$dayInWeek = $this->getDayNumInWeek($date);
-
-        return $dayInWeek / $this->work_days_count <= 1;*/
     }
 
     public function isHoliday($date)
@@ -167,8 +157,8 @@ class ShiftSchedule
             $is_work = $this->isWorkDay($date);
 
             $days[] = [
-                'date' => $date->format('Y-m-d'),
-                'is_work' => $is_work,
+                'date'       => $date->format('Y-m-d'),
+                'is_work'    => $is_work,
                 'is_holiday' => !$is_work
             ];
         }
