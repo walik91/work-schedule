@@ -88,6 +88,79 @@ class ShiftSchedule
         return $dayNum;
     }
 
+    public function checkRegularPeriod(\Carbon\CarbonPeriod $period)
+    {
+        $left_work_days = $this->getWorkDaysCount();
+        $left_holidays  = 0;
+
+        $is_workday = true;
+
+        foreach ($period as $day) {
+            if ($this->hasWeekend($day->dayOfWeek) || $this->hasHoliday($day->format('Y-m-d'))) {
+                continue;
+            }
+
+            if ($left_work_days > 0) {
+                $left_work_days--;
+
+                if ($left_work_days <= 0 ) {
+                    $left_holidays = $this->getHolidayDaysCount();
+                }
+
+
+                $is_workday = true;
+            } elseif ($left_holidays > 0) {
+                $left_holidays--;
+
+                if ($left_holidays <= 0 ) {
+                    $left_work_days = $this->getWorkDaysCount();
+                }
+
+                $is_workday = false;
+            }
+        }
+
+        return $is_workday;
+    }
+
+    public function checkBackwardPeriod(\Carbon\CarbonPeriod $period)
+    {
+        $left_work_days = 0;
+        $left_holidays  = $this->getHolidayDaysCount();
+
+        $is_workday = true;
+
+        foreach ($period as $day) {
+            if ($this->hasWeekend($day->dayOfWeek) || $this->hasHoliday($day->format('Y-m-d'))) {
+                continue;
+            }
+
+            if ($left_holidays > 0) {
+                $left_holidays--;
+
+                if ($left_holidays <= 0 ) {
+                    $left_work_days = $this->getWorkDaysCount();
+                }
+
+                $is_workday = false;
+            } elseif ($left_work_days >= 0) {
+                $left_work_days--;
+
+                if ($left_work_days <= 0 ) {
+                    $left_holidays = $this->getHolidayDaysCount();
+                }
+
+
+                $is_workday = true;
+            }
+
+
+
+        }
+
+        return $is_workday;
+    }
+
     public function isWorkDay($date)
     {
         $date = $this->getCarbonDate($date);
@@ -104,38 +177,13 @@ class ShiftSchedule
         $period->setStartDate($this->getStartWorkDate());
         $period->setEndDate($date);
 
-        $this->getHolidayDaysCount();
+        if (\Carbon\Carbon::createFromFormat('Y-m-d', $this->getStartWorkDate())->lessThanOrEqualTo($date)) {
+            return $this->checkRegularPeriod($period);
+        } else {
+            $period->invertDateInterval();
 
-        $left_work_days = $this->getWorkDaysCount();
-        $left_holidays  = 0;
-
-        $is_workday = true;
-
-        foreach ($period as $day) {
-            if ($this->hasWeekend($day->dayOfWeek) || $this->hasHoliday($day->format('Y-m-d'))) {
-                continue;
-            }
-
-            if ($left_work_days > 0) {
-                $left_work_days--;
-
-                if ($left_work_days <= 0) {
-                    $left_holidays = $this->getHolidayDaysCount();
-                }
-
-                $is_workday = true;
-            } elseif ($left_holidays > 0) {
-                $left_holidays--;
-
-                if ($left_holidays <= 0) {
-                    $left_work_days = $this->getWorkDaysCount();
-                }
-
-                $is_workday = false;
-            }
+            return $this->checkBackwardPeriod($period);
         }
-
-        return $is_workday;
     }
 
     public function isHoliday($date)
