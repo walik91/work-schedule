@@ -1,6 +1,6 @@
 {
     "name": "vzaica/work-schedule",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "license": "MIT",
     "require": {
         "nesbot/carbon": ">=1.36.2"
